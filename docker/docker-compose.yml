@@ -1,0 +1,36 @@
+# 占位：请按本机环境替换镜像与命令。MinerU / vLLM 官方部署方式见各自文档。
+# 单机串行：建议先只启动 MinerU，任务解析完成后再启动 vLLM（或分 GPU / 分进程）。
+
+services:
+  # 示例：需自建 MinerU HTTP 网关，使 POST {base}/v1/parse 接受 multipart file，
+  # 返回 JSON：{ "markdown": "..." } 或 { "text": "..." } 或 { "blocks": [{"text":"..."}] }。
+  # mineru:
+  #   image: your-mineru-gateway:latest
+  #   ports:
+  #     - "8001:8001"
+
+  # vLLM OpenAI 兼容：默认 http://127.0.0.1:8000/v1/chat/completions
+  # vllm:
+  #   image: vllm/vllm-openai:latest
+  #   command: ["--model", "Qwen/Qwen2.5-7B-Instruct"]
+  #   ports:
+  #     - "8000:8000"
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - capabilities: [gpu]
+
+  postgres:
+    image: postgres:16-alpine
+    profiles: ["db"]
+    environment:
+      POSTGRES_USER: transproj
+      POSTGRES_PASSWORD: transproj
+      POSTGRES_DB: transproj
+    ports:
+      - "5432:5432"
+
+networks:
+  default:
+    name: trans-proj-net

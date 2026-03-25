@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: trans-proj
+  servlet:
+    multipart:
+      max-file-size: 80MB
+      max-request-size: 85MB
+  datasource:
+    url: jdbc:h2:file:./data/transproj-db
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: ""
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+  h2:
+    console:
+      enabled: true
+
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+app:
+  mock-pipeline: true
+  storage:
+    base-dir: ./data
+  mineru:
+    base-url: http://127.0.0.1:8001
+    timeout-seconds: 600
+  llm:
+    base-url: http://127.0.0.1:8000/v1
+    model: Qwen/Qwen2.5-7B-Instruct
+    api-key: ""
+  translation:
+    chunk-size: 1200
+    max-concurrent-chunks: 1
+  deployment:
+    gpu-serial-parse-then-translate: true
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local-nvidia
+app:
+  mock-pipeline: false
+
+---
+spring:
+  config:
+    activate:
+      on-profile: local-mac
+app:
+  mock-pipeline: false
