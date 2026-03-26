@@ -4,12 +4,14 @@ import com.transproj.domain.Segment;
 import com.transproj.domain.TranslationJob;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.poi.xwpf.usermodel.XWPFParagraph;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Service
@@ -21,19 +23,31 @@ public class ExportService {
         }
         if ("md".equalsIgnoreCase(format)) {
             String md = buildMarkdown(segments);
-            byte[] bytes = md.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            byte[] bytes = md.getBytes(StandardCharsets.UTF_8);
+            String filename = safeFileBase(job) + ".md";
+            ContentDisposition disposition = ContentDisposition.attachment()
+                    .filename(filename, StandardCharsets.UTF_8)
+                    .build();
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + safeFileBase(job) + ".md\"")
-                    .contentType(new MediaType("text", "markdown", java.nio.charset.StandardCharsets.UTF_8))
+                    .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
+                    .contentType(new MediaType("text", "markdown", StandardCharsets.UTF_8))
                     .body(bytes);
         }
         byte[] docx = buildDocx(segments);
+        String filename = safeFileBase(job) + ".docx";
+        ContentDisposition disposition = ContentDisposition.attachment()
+                .filename(filename, StandardCharsets.UTF_8)
+                .build();
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + safeFileBase(job) + ".docx\"")
+                .header(HttpHeaders.CONTENT_DISPOSITION, disposition.toString())
                 .contentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))
                 .body(docx);
     }
 
+    /**
+     * Keeps Unicode letters (e.g. CJK) and most safe punctuation; strips only path / OS-forbidden characters.
+     * Historic behavior used {@code [^a-zA-Z0-9._-]}, which turned Chinese filenames into long underscore runs.
+     */
     private static String safeFileBase(TranslationJob job) {
         String name = job.getOriginalFilename();
         if (name == null || name.isBlank()) {
@@ -43,7 +57,15 @@ public class ExportService {
         if (dot > 0) {
             name = name.substring(0, dot);
         }
-        return name.replaceAll("[^a-zA-Z0-9._-]", "_");
+        name = name.trim();
+        if (name.isBlank()) {
+            return "translation";
+        }
+        name = name.replaceAll("[\\\\/:*?\"<>|\\p{Cntrl}]", "_").trim();
+        if (name.isBlank()) {
+            return "translation";
+        }
+        return name;
     }
 
     private static String buildMarkdown(List<Segment> segments) {
