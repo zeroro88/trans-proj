@@ -24,6 +24,36 @@ cd frontend && npm install && npm run dev
 
 浏览器打开 <http://localhost:5173>，上传任意 PDF 即可看到 Mock 结果。
 
+
+
+## Apple Silicon 本机 vLLM（方案 A：源码 + CPU）
+
+官方 **无** Apple 预编译 wheel，需在 **macOS Sonoma+**、**Xcode CLT** 就绪后从源码安装（见 [vLLM CPU / Apple silicon](https://docs.vllm.ai/en/latest/getting_started/installation/cpu.html)）。
+
+在**仓库根目录**执行（已用 `uv`；与 MinerU 习惯一致）：
+
+```bash
+mkdir -p .vllm-build && cd .vllm-build
+uv venv --python 3.11 --seed
+source .venv/bin/activate
+git clone --depth 1 https://github.com/vllm-project/vllm.git
+cd vllm
+uv pip install -r requirements/cpu.txt --index-strategy unsafe-best-match
+uv pip install -e .
+```
+
+启动 OpenAI 兼容 API（**Apple Silicon CPU 上请用小模型**，例如 0.5B；`app.llm.model` 须与 `--model` 一致）：
+
+```bash
+cd /path/to/trans-proj
+./scripts/start-vllm-macos.sh
+# 或自定义：VLLM_MODEL=Qwen/Qwen2.5-1.5B-Instruct ./scripts/start-vllm-macos.sh
+```
+
+后端使用：`SPRING_PROFILES_ACTIVE=local-mac ./mvnw spring-boot:run`（`local-mac` 下默认模型已为 `Qwen/Qwen2.5-0.5B-Instruct`）。
+
+构建目录 `.vllm-build/` 已加入 `.gitignore`，勿提交。
+
 ## 接入真实 MinerU / vLLM
 
 1. 在 `backend/src/main/resources/application.yml` 将 **`app.mock-pipeline`** 设为 **`false`**（或使用 profile `local-mac` / `local-nvidia`，其中已设为 `false`）。

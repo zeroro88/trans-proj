@@ -1,5 +1,6 @@
 import { DownloadOutlined, HomeOutlined } from "@ant-design/icons";
 import { Button, Card, Col, Progress, Row, Space, Spin, Tag, Typography, theme } from "antd";
+import { SegmentMarkdown } from "@/components/SegmentMarkdown";
 import { useQuery } from "@tanstack/react-query";
 import { Link, useParams } from "react-router-dom";
 import { exportUrl, fetchJob } from "@/api/jobs";
@@ -52,6 +53,9 @@ export function JobPage() {
   return (
     <Space direction="vertical" size="large" style={{ width: "100%" }}>
       <Space wrap>
+        <Link to="/jobs">
+          <Button>任务列表</Button>
+        </Link>
         <Link to="/">
           <Button icon={<HomeOutlined />}>上传新文件</Button>
         </Link>
@@ -96,12 +100,12 @@ export function JobPage() {
           <Row gutter={16} style={{ marginTop: 8 }}>
             <Col xs={24} md={12}>
               <Card size="small" title="原文" type="inner">
-                <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>{seg.source}</Paragraph>
+                <SegmentMarkdown>{seg.source}</SegmentMarkdown>
               </Card>
             </Col>
             <Col xs={24} md={12}>
               <Card size="small" title="译文" type="inner">
-                <Paragraph style={{ whiteSpace: "pre-wrap", marginBottom: 0 }}>{seg.target}</Paragraph>
+                <SegmentMarkdown>{seg.target}</SegmentMarkdown>
               </Card>
             </Col>
           </Row>

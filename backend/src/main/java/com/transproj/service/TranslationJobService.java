@@ -14,6 +14,7 @@ import com.transproj.domain.TranslationJob;
 import com.transproj.repo.TranslationJobRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -170,6 +171,11 @@ public class TranslationJobService {
     @Transactional(readOnly = true)
     public TranslationJob getJob(String id) {
         return jobRepository.findById(id).orElse(null);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TranslationJob> listJobsOrderByCreatedDesc() {
+        return jobRepository.findAll(Sort.by(Sort.Direction.DESC, "createdAt"));
     }
 
     public List<Segment> segmentsFor(TranslationJob job) {

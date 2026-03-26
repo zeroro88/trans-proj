@@ -6,6 +6,7 @@ import com.transproj.service.ExportService;
 import com.transproj.service.StoragePaths;
 import com.transproj.service.TranslationJobService;
 import com.transproj.web.dto.CreateJobResponse;
+import com.transproj.web.dto.JobSummaryResponse;
 import com.transproj.web.dto.JobStatusResponse;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,7 @@ import com.transproj.domain.Segment;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/jobs")
@@ -61,6 +63,24 @@ public class JobController {
                 file.getOriginalFilename() != null ? file.getOriginalFilename() : "document.pdf");
         translationJobService.runPipelineAsync(job.getId());
         return ResponseEntity.ok(new CreateJobResponse(job.getId()));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<JobSummaryResponse>> list() {
+        List<JobSummaryResponse> items = translationJobService.listJobsOrderByCreatedDesc().stream()
+                .map(j -> new JobSummaryResponse(
+                        j.getId(),
+                        j.getStatus(),
+                        j.getProgress(),
+                        j.getSourceLang(),
+                        j.getTargetLang(),
+                        j.getOriginalFilename(),
+                        j.getErrorCode(),
+                        j.getErrorMessage(),
+                        j.getCreatedAt(),
+                        j.getUpdatedAt()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(items);
     }
 
     @GetMapping("/{id}")

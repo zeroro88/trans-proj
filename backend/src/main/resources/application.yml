@@ -60,3 +60,5 @@ spring:
       on-profile: local-mac
 app:
   mock-pipeline: false
+  llm:
+    model: Qwen/Qwen2.5-0.5B-Instruct

@@ -1,4 +1,4 @@
-import type { JobStatusResponse } from "@/types";
+import type { JobStatusResponse, JobSummary } from "@/types";
 
 export async function createJob(
   file: File,
@@ -14,6 +14,14 @@ export async function createJob(
     throw new Error(`上传失败: ${res.status}`);
   }
   return res.json() as Promise<{ jobId: string }>;
+}
+
+export async function fetchJobs(): Promise<JobSummary[]> {
+  const res = await fetch("/api/jobs");
+  if (!res.ok) {
+    throw new Error(`列表加载失败: ${res.status}`);
+  }
+  return res.json() as Promise<JobSummary[]>;
 }
 
 export async function fetchJob(id: string): Promise<JobStatusResponse> {

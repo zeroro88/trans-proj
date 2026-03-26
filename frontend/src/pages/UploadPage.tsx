@@ -2,7 +2,7 @@ import { InboxOutlined } from "@ant-design/icons";
 import type { UploadProps } from "antd";
 import { Button, Form, Select, Space, Typography, Upload, message } from "antd";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createJob } from "@/api/jobs";
 
 const { Title, Paragraph } = Typography;
@@ -33,8 +33,8 @@ export function UploadPage() {
     setSubmitting(true);
     try {
       const { jobId } = await createJob(file, pair.source, pair.target);
-      message.success("已提交，正在处理…");
-      nav(`/job/${jobId}`);
+      message.success("已提交，可在任务列表查看进度");
+      nav(`/jobs`);
     } catch (e) {
       message.error(e instanceof Error ? e.message : "提交失败");
     } finally {
@@ -54,7 +54,12 @@ export function UploadPage() {
 
   return (
     <Space direction="vertical" size="large" style={{ width: "100%", maxWidth: 640 }}>
-      <Title level={3}>上传 PDF</Title>
+      <Space align="baseline" style={{ width: "100%", justifyContent: "space-between" }}>
+        <Title level={3} style={{ margin: 0 }}>
+          上传 PDF
+        </Title>
+        <Link to="/jobs">查看任务列表</Link>
+      </Space>
       <Paragraph type="secondary">
         后端默认 <code>app.mock-pipeline=true</code> 时不调用 MinerU / vLLM，仅用于界面联调。接入真实服务请参阅仓库 README。
       </Paragraph>

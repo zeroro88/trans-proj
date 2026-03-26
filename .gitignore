@@ -34,3 +34,10 @@ frontend/dist/
 
 # Maven Wrapper JAR（若使用 wrapperUrl 下载的完整 wrapper，勿被 *.jar 忽略）
 !backend/.mvn/wrapper/maven-wrapper.jar
+
+# Local vLLM source build (Apple Silicon)
+.vllm-build/
+
+# Python
+__pycache__/
+*.py[cod]
